@@ -1,0 +1,108 @@
+<?php
+
+
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+header('Access-Control-Allow-Origin: *');
+// if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+// header('Access-Control-Allow-Origin: *');
+if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+	header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+	header('Access-Control-Allow-Headers:  Origin, X-Requested-With, Content-Type, Accept');
+	exit;
+}
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+class EmailController extends CI_Controller{
+    function __construct(){
+        parent::__construct();
+        $this->load->model('Login');
+        // require_once(APPPATH.'vendor/phpmailer/phpmailer/src/PHPMailer.php');
+        // require_once(APPPATH.'vendor/phpmailer/phpmailer/src/SMTP.php');
+        //   $this->load->model('Login');
+        //   $this->load->library('email');
+    }
+    function sendEmail()
+    {        
+        $EmailData=trim($this->input->post("emaildetail"));
+        $data=array('email'=>$EmailData);
+        $numRow=$this->Login->getRequest($data);
+        if($numRow->num_rows() > 0)
+        {
+                $mail = new PHPMailer(true);
+
+                try
+                {
+                    //Server settings
+                        $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+                        $mail->isSMTP();                                            //Send using SMTP
+                        // $mail->Host       = 'sandbox.smtp.mailtrap.io';                     //Set the SMTP server to send through
+                        $mail->Host ="smtp.gmail.com";
+                        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+                        $mail->Username   = 'rinkesh@merchantech';                     //SMTP username
+                        $mail->Password   = 'Apprication@741';                               //SMTP password
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+                        $mail->Port       = 465;      
+                        $mail->SMTPSecure='tls';                              //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+                        //Recipients
+                        $mail->setFrom('rinkesh@merchantech.com', 'Mailer');
+                        $mail->addAddress($EmailData, 'rinkeshNew');     //Add a recipient 
+                        // $mail->addAddress('ellen@example.com');               //Name is optional
+                        // $mail->addReplyTo('info@example.com', 'Information');
+                        // $mail->addCC('cc@example.com');
+                        // $mail->addBCC('bcc@example.com');
+
+                        //Attachments
+                        // $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
+                        // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
+
+                        //Content
+                        $mail->isHTML(true);                                  //Set email format to HTML
+                        $mail->Subject = 'Here is the subject';
+                        // $mail->Body    = "test data";
+                        $mail->Body = 'hii'." ".$EmailData." ".'quickvee.com welcoming you'."".'<a href="http://localhost:3000/reset">E-Mail to Max Mustermann</a>';
+                        $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+                        if($mail->send())
+                        {
+                            $response=[
+                            'message'=>'Your Email has successfully been sent.',
+                            'data'=>$EmailData,
+                            'status'=>200
+                            ];
+                          
+
+                        }
+                        else
+                        {
+                            $response=[
+                            "status"=>400,
+                            "message"=>"message can not be send",
+                            ];
+
+                        }
+                        // echo 'Message has been sent';
+
+                        // echo json_encode($response);
+                } 
+                catch (Exception $e) 
+                {
+                    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                }
+        }
+        else
+        {
+            $response=[
+                "status"=>400,
+                "message"=>"Email id does not found",
+            ];
+          
+
+        }
+         echo json_encode($response);
+    }
+}
