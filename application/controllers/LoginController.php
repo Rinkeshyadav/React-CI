@@ -340,15 +340,11 @@ function reset_password_send()
             $response=array();
             $email=trim(strtolower($this->input->post("email")));
             $data=$this->Login->UserData($email);
-            
-            // print_r($name);
-            // echo $data->num_rows();
-            // exit();
             if($data->num_rows() > 0)
             {
                 $result_data=$data->row_array();
-                $name=$result_data['name'];
-                // $name="pinkesh";
+                // $name=$result_data['name'];
+                $name="pinkesh";
                 $this->general_model->generatePassword();
                 $ver_code=md5($this->general_model->generatePassword());// THIS field has a doute
                 $emailcode=base64_encode($ver_code.":|:".$email);
@@ -359,22 +355,15 @@ function reset_password_send()
                     {
                         $data=$this->db->query("update users set password_reset_code='".$ver_code."',password_reset_status='2' where email='$email'  ");
                         require_once('class/mailer/custom_mail.php');
+                        $ses_name = $name;
+                        // $code_url ="http://localhost/React-CI/LoginController/reset_password/?vc=".$emailcode;
+                        $code_url="http://localhost:3000/forgotpassword/?vc=".$emailcode;
+                        
+                        include_once('class/reset_password.php');
+
                         $suB='Reset Password';
-                        $emailBody="<table border='0' width='100%' cellpadding='0' cellspacing='0' align='center' style='max-width:600px;margin:auto;border-spacing:0;border-collapse:collapse;background:white;border-radius:0px 0px 10px 10px'>
-                        <tbody style='background-color:#fafafa;'>
-                        <tr style='background-size:cover'>
-                        <td colspan='3' style='text-align:center;border-collapse:collapse;border-radius:10px 10px 0px 0px; color:white; height:50px;background-color:#0a64f9;padding:10px'>
-                        <img src='https://ci6.googleusercontent.com/proxy/KMcbu8zrXoyWKSbPbnxVubGTx7PgYRs0S09MuME0p2pHSnUzhBCauFlLKn8LlYdveuxEOkeZehwgsghRc06WBSAvXg=s0-d-e1-ft#https://sandbox.quickvee.com/images/maillogo.png' width='80' class='CToWUd'>
-                        </td>
-                        </tr>
-                        <tr style='margin-bottom:10px;display:block;margin-top:30px;'>
-                                <td style='padding: 0 20px;'>Hello .'".$name."',</td>
-                        </tr>
-                        <tr style='margin-bottom:10px;display:block;'>
-                        <td style='padding: 0 20px;'>We have received a request to reset the password for your account.To reset your password, please </td>
-                        </tr>
-                        </tbody>
-                        </table>";
+                       
+                        // href='mailto:support@quickvee.com'
                         $mailClass=new mailCustom;
                         $options=array(
                         'from'=>'admin@quickvee.com',
@@ -403,6 +392,31 @@ function reset_password_send()
         
 
 
+        }
+        
+
+        function reset_password_save(){
+            $data="MjAxNmYwZDY2ZGI5MTIwMzk5NzRhNzE5YTA3OGViZmI6fDpyaW5rZXNoQG1lcmNoYW50ZWNoLmNvbQ==";
+            $codeFilter=explode(":|:",base64_decode($data));
+            print_r($codeFilter);
+            exit();
+            
+		 //echo '<pre>';print_r(	$vc);exit();
+		// $vrCode=$codeFilter[0];
+		// $Username=$codeFilter[1];
+            $new_password= $this->input->post("new_password");
+            $confirm_password=$this->input->post('confirm_password');
+            $this->load->library('form_validation');
+            // $this->form_validation->set_rules('new_password','Newpassword','New Password','trim|required|xss_clean');
+            // $this->form_validation->set_rules('confirm_password','Confirm Password','trim|required|xss_clean|callback_reset_chk');
+            $this->form_validation->set_rules("new_password","NewPassword","required");
+            $this->form_validation->set_rules("confirm_password","Confirm Password","required");
+            if($this->form_validation->run()==true){
+               
+
+            }else{
+                echo "wrong";
+            }
         }
 }
 ?>
