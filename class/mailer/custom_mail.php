@@ -6,7 +6,6 @@ require 'vendor/autoload.php';
 class mailCustom extends PHPMailer
 {
 public  function Email($option){
-//    return $option;
 	$mode='on';
 	if(isset($option['from'])){
 		$from = $option['from'];
@@ -22,7 +21,7 @@ public  function Email($option){
 			$this->isSMTP();
 			$this->Debugoutput = 'html';
 			$this->Host = 'smtp.gmail.com';
-			$this->Port ='465'; //587
+			$this->Port ='587'; //587
 			$this->SMTPSecure = 'ssl';
 			$this->SMTPAuth = true;
 			$this->Username ='support@quickvee.com'; //admin@swiftpizza.com //malik.saleh@apprication.com
